@@ -1,38 +1,63 @@
-import { useState } from 'react'
 import './App.css'
 import options from './assets/options.json'
+import Radio from './components/Radio.jsx'
+import React from 'react'
+
+//*** é possível colocar os resultados no json e evitar de usar uma variável só para isso */
 
 function App() {
-  const [count, setCount] = useState(0)
-  {
+  const [slide,setSlide] = React.useState(0);
+  const handleClick = () => {
+    if (slide >= options.length) return; 
+    setSlide(s => s + 1);
+  }
+  const [respostas,setRespostas] = React.useState([]);
+  const handleChange = (e) => {
+    console.log('set',e.target.name,e.target.value);
+    setRespostas(r => {
+      r = r.filter(f => f.id !== e.target.name)
+      if(!r) r=[];
+      r.push({id:e.target.name,resposta:e.target.value,color:'red'})
+      return r;
+    });
+  }
+  const exibeResultado = () => {
+    console.log('respostas',respostas);
+    respostas.map(r => {
+      options.forEach(o => {
+        if(r.id == o.id && r.resposta == o.resposta){
+          r.color = 'green'
+        }
+      });
+    })
     return (
-      <div>ola
-      {
-        options.map((option) => {
-          return (
-            <>
-              <fieldset style={{padding: '2rem',marginBottom: '1rem',border: '2px solid #eee',}}>
-                <legend>{option.pergunta}</legend>
-                  {
-                    option.options.map((opt) => (
-                      <label key={opt} style={{ marginBottom: '1rem', fontFamily: 'monospace' }}>
-                        <input id={option.id} type="radio" value={opt} />
-                        {opt}
-                      </label>
-
-                    ))
-                  }
-              </fieldset>
-            </>
-          )
-        })
-      }
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
+      <div>
+        {
+          respostas.map(r => (
+            <p key={r.id} style={{'color':r.color}}>{r.resposta}</p>
+          ))
+        }
       </div>
     )
   }
+  return (
+    <>
+      {
+        options.map((option, index) => (
+          <Radio key={option.id} id={option.id} pergunta={option.pergunta} active={slide==index} options={option.options} onChange={handleChange} />
+        ))
+      }
+      {
+        (slide<4?
+          <button onClick={handleClick}>Próxima</button>
+          :
+          <div>
+          {exibeResultado()}
+          </div>
+        )
+      }
+    </>
+  )
 }
 
 export default App
